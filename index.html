@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExpenseIQ — Personal Finance Dashboard</title>
+
+  <!-- No external fonts or icon libraries — style.css uses system fonts,
+       and icons below are plain emoji/text so the page has zero CDN calls. -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Checkbox hack: drives the mobile sidebar drawer with zero JavaScript -->
+  <input type="checkbox" id="nav-toggle" />
+
+  <div class="app-shell">
+
+    <!-- ============================= SIDEBAR ============================= -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span class="icon" aria-hidden="true">💼</span></div>
+        <span class="brand-name">Expense<span>IQ</span></span>
+      </div>
+
+      <nav class="nav-group">
+        <a class="nav-link active" href="#dashboard"><span class="icon" aria-hidden="true">📊</span> Dashboard</a>
+        <a class="nav-link" href="#transactions"><span class="icon" aria-hidden="true">🧾</span> Transactions</a>
+        <a class="nav-link" href="#categories"><span class="icon" aria-hidden="true">🏷️</span> Categories</a>
+        <a class="nav-link" href="#budget"><span class="icon" aria-hidden="true">🐖</span> Budget</a>
+        <a class="nav-link" href="#reports"><span class="icon" aria-hidden="true">📈</span> Reports</a>
+
+        <p class="nav-label">Account</p>
+        <a class="nav-link" href="#profile"><span class="icon" aria-hidden="true">👤</span> Profile</a>
+        <a class="nav-link" href="#settings"><span class="icon" aria-hidden="true">⚙️</span> Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a class="nav-link" href="#logout"><span class="icon" aria-hidden="true">🚪</span> Logout</a>
+      </div>
+    </aside>
+
+    <!-- Tapping the dimmed overlay closes the mobile drawer (label = checkbox) -->
+    <label for="nav-toggle" class="overlay"></label>
+
+    <!-- ============================= TOPBAR ============================= -->
+    <header class="topbar">
+      <label for="nav-toggle" class="menu-icon"><span class="icon" aria-hidden="true">☰</span></label>
+
+      <div class="search-bar">
+        <span class="icon" aria-hidden="true">🔍</span>
+        <input type="text" placeholder="Search transactions, categories..." />
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+          <span class="icon" aria-hidden="true">🌗</span>
+        </button>
+        <button class="icon-btn" title="Notifications" aria-label="Notifications">
+          <span class="icon" aria-hidden="true">🔔</span>
+          <span class="dot"></span>
+        </button>
+        <div class="user-chip">
+          <div class="avatar" role="img" aria-label="Prosper Adebayo's profile picture">PA</div>
+          <div>
+            <p class="name">Prosper Adebayo</p>
+            <p class="role">Personal Account</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================= MAIN ============================= -->
+    <main class="main-content">
+
+      <!-- ---------- DASHBOARD ---------- -->
+      <section id="dashboard">
+        <div class="section-heading">
+          <div>
+            <h2>Dashboard</h2>
+            <p>Live numbers from the ExpenseIQ server — not demo data.</p>
+          </div>
+        </div>
+
+        <!-- Shown once, the first time there's no starting balance on record -->
+        <form id="balance-setup" class="card balance-setup-card" hidden>
+          <label for="starting-balance">Set your starting balance to begin</label>
+          <div class="balance-setup-row">
+            <input type="number" id="starting-balance" placeholder="e.g. 500" step="0.01" min="0" required />
+            <button type="submit" class="btn btn-primary">Set Balance</button>
+          </div>
+          <p id="balance-error" class="form-error"></p>
+        </form>
+
+        <div class="summary-grid">
+          <div class="card summary-card balance">
+            <div class="icon-badge"><span class="icon" aria-hidden="true">⚖️</span></div>
+            <p class="amount" id="stat-balance">—</p>
+            <p class="label">Total Balance</p>
+          </div>
+
+          <div class="card summary-card expense">
+            <div class="icon-badge"><span class="icon" aria-hidden="true">📉</span></div>
+            <p class="amount" id="stat-total-expenses">—</p>
+            <p class="label">Total Expenses</p>
+            <span class="trend" id="stat-count">0 expenses logged</span>
+          </div>
+
+          <div class="card summary-card savings">
+            <div class="icon-badge"><span class="icon" aria-hidden="true">📊</span></div>
+            <p class="amount" id="stat-average">—</p>
+            <p class="label">Average Expense</p>
+          </div>
+
+          <div class="card summary-card income">
+            <div class="icon-badge"><span class="icon" aria-hidden="true">📈</span></div>
+            <p class="amount" id="stat-highest">—</p>
+            <p class="label">Highest Expense</p>
+            <span class="trend" id="stat-highest-name">&nbsp;</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- CHARTS ---------- -->
+      <section id="reports">
+        <div class="section-heading">
+          <div>
+            <h2>Reports</h2>
+            <p>Visual breakdown of your spending patterns.</p>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="card chart-card">
+            <div class="chart-placeholder">
+              <span class="icon" aria-hidden="true">📊</span>
+              <span>Monthly Spending Chart</span>
+            </div>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-placeholder">
+              <span class="icon" aria-hidden="true">📊</span>
+              <span>Expense by Category</span>
+            </div>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-placeholder">
+              <span class="icon" aria-hidden="true">📉</span>
+              <span>Income vs Expense</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- TRANSACTIONS ---------- -->
+      <section id="transactions">
+        <div class="section-heading">
+          <div>
+            <h2>Recent Transactions</h2>
+            <p>Your latest account activity.</p>
+          </div>
+          <button id="save-file-btn" class="btn btn-ghost"><span class="icon" aria-hidden="true">💾</span> Save to File</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-body">
+              <tr id="transactions-empty">
+                <td colspan="5">No expenses logged yet — add one below to see it here.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------- BUDGET ---------- -->
+      <section id="budget">
+        <div class="section-heading">
+          <div>
+            <h2>Budget</h2>
+            <p>Track how much of each envelope is left.</p>
+          </div>
+        </div>
+
+        <div class="budget-grid">
+          <div class="card budget-card">
+            <div class="budget-top">
+              <h4>Food &amp; Groceries</h4>
+              <span><span class="icon" aria-hidden="true">🍽️</span></span>
+            </div>
+            <div class="budget-amounts">
+              <span>Spent: <strong>$310</strong></span>
+              <span>Budget: <strong>$400</strong></span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 78%"></div>
+            </div>
+            <p class="budget-remaining">$90 remaining · 78% used</p>
+          </div>
+
+          <div class="card budget-card">
+            <div class="budget-top">
+              <h4>Transport</h4>
+              <span><span class="icon" aria-hidden="true">🚗</span></span>
+            </div>
+            <div class="budget-amounts">
+              <span>Spent: <strong>$95</strong></span>
+              <span>Budget: <strong>$150</strong></span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 63%"></div>
+            </div>
+            <p class="budget-remaining">$55 remaining · 63% used</p>
+          </div>
+
+          <div class="card budget-card">
+            <div class="budget-top">
+              <h4>Entertainment</h4>
+              <span><span class="icon" aria-hidden="true">🎬</span></span>
+            </div>
+            <div class="budget-amounts">
+              <span>Spent: <strong>$92</strong></span>
+              <span>Budget: <strong>$100</strong></span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill warn" style="width: 92%"></div>
+            </div>
+            <p class="budget-remaining">$8 remaining · 92% used</p>
+          </div>
+
+          <div class="card budget-card">
+            <div class="budget-top">
+              <h4>Utilities</h4>
+              <span><span class="icon" aria-hidden="true">⚡</span></span>
+            </div>
+            <div class="budget-amounts">
+              <span>Spent: <strong>$54</strong></span>
+              <span>Budget: <strong>$120</strong></span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 45%"></div>
+            </div>
+            <p class="budget-remaining">$66 remaining · 45% used</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- CATEGORIES ---------- -->
+      <section id="categories">
+        <div class="section-heading">
+          <div>
+            <h2>Categories</h2>
+            <p>Where your money tends to go.</p>
+          </div>
+        </div>
+
+        <div class="category-grid">
+          <div class="card category-card">
+            <div class="icon-badge" style="background:var(--clr-primary)"><span class="icon" aria-hidden="true">🍽️</span></div>
+            <h4>Food</h4>
+            <p class="spent">$310.00 spent</p>
+          </div>
+          <div class="card category-card">
+            <div class="icon-badge" style="background:var(--clr-secondary)"><span class="icon" aria-hidden="true">🚗</span></div>
+            <h4>Transport</h4>
+            <p class="spent">$95.00 spent</p>
+          </div>
+          <div class="card category-card">
+            <div class="icon-badge" style="background:var(--clr-accent)"><span class="icon" aria-hidden="true">🛍️</span></div>
+            <h4>Shopping</h4>
+            <p class="spent">$126.40 spent</p>
+          </div>
+          <div class="card category-card">
+            <div class="icon-badge" style="background:#ef4444"><span class="icon" aria-hidden="true">🎬</span></div>
+            <h4>Entertainment</h4>
+            <p class="spent">$92.00 spent</p>
+          </div>
+          <div class="card category-card">
+            <div class="icon-badge" style="background:var(--clr-secondary-dark)"><span class="icon" aria-hidden="true">⚡</span></div>
+            <h4>Utilities</h4>
+            <p class="spent">$54.00 spent</p>
+          </div>
+          <div class="card category-card">
+            <div class="icon-badge" style="background:var(--clr-primary-dark)"><span class="icon" aria-hidden="true">🩺</span></div>
+            <h4>Health</h4>
+            <p class="spent">$40.00 spent</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- ADD EXPENSE FORM ---------- -->
+      <section id="add-expense">
+        <div class="section-heading">
+          <div>
+            <h2>Add New Expense</h2>
+            <p>Log a transaction to keep your dashboard accurate.</p>
+          </div>
+        </div>
+
+        <form id="add-expense-form" class="card form-card">
+          <p id="expense-form-message" class="form-error" hidden></p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="exp-title">Expense Title</label>
+              <input type="text" id="exp-title" placeholder="e.g. Grocery run" />
+            </div>
+
+            <div class="form-field">
+              <label for="exp-amount">Amount</label>
+              <input type="number" id="exp-amount" placeholder="0.00" step="0.01" />
+            </div>
+
+            <div class="form-field">
+              <label for="exp-category">Category</label>
+              <select id="exp-category">
+                <option>Food</option>
+                <option>Transport</option>
+                <option>Shopping</option>
+                <option>Entertainment</option>
+                <option>Utilities</option>
+                <option>Health</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="exp-date">Date</label>
+              <input type="date" id="exp-date" />
+            </div>
+
+            <div class="form-field">
+              <label for="exp-method">Payment Method</label>
+              <select id="exp-method">
+                <option>Debit Card</option>
+                <option>Bank Transfer</option>
+                <option>Cash</option>
+                <option>Paystack</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="exp-receipt">Receipt</label>
+              <div class="upload-box" id="exp-receipt">
+                <span class="icon" aria-hidden="true">⬆️</span>
+                <span>Click to upload receipt (JPG, PNG, PDF)</span>
+              </div>
+            </div>
+
+            <div class="form-field full">
+              <label for="exp-notes">Notes</label>
+              <textarea id="exp-notes" placeholder="Add any extra detail about this expense..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="reset" class="btn btn-ghost">Cancel</button>
+              <button type="submit" class="btn btn-primary"><span class="icon" aria-hidden="true">✓</span> Save Expense</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- ---------- PROFILE ---------- -->
+      <section id="profile">
+        <div class="section-heading">
+          <div>
+            <h2>Profile</h2>
+            <p>Manage your personal account details.</p>
+          </div>
+        </div>
+
+        <form class="card profile-card">
+          <div class="profile-photo">
+            <div class="avatar avatar-lg" role="img" aria-label="Prosper Adebayo's profile picture">PA</div>
+            <button type="button" class="btn btn-ghost"><span class="icon" aria-hidden="true">📷</span> Change Photo</button>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="prof-name">Full Name</label>
+              <input type="text" id="prof-name" value="Prosper Adebayo" />
+            </div>
+
+            <div class="form-field">
+              <label for="prof-email">Email</label>
+              <input type="email" id="prof-email" value="prosper.adebayo@babcock.edu.ng" />
+            </div>
+
+            <div class="form-field">
+              <label for="prof-currency">Currency</label>
+              <select id="prof-currency">
+                <option>NGN — Nigerian Naira</option>
+                <option>USD — US Dollar</option>
+                <option>EUR — Euro</option>
+                <option>GBP — British Pound</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="prof-language">Language</label>
+              <select id="prof-language">
+                <option>English</option>
+                <option>French</option>
+                <option>Yoruba</option>
+                <option>Hausa</option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary"><span class="icon" aria-hidden="true">✓</span> Save Changes</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- ---------- FOOTER ---------- -->
+      <footer class="site-footer">
+        <p>&copy; 2026 ExpenseIQ. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#contact">Contact</a>
+          <a href="#help">Help Center</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
